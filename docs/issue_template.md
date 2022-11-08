@@ -35,4 +35,4 @@ We suggest using bullets (indicated by * or -) or checkboxes [ ] (filled checkbo
 
 ### Who want to work on this issue?
 
-<!-- Please indicate if you wants to be assigned to the issue -->
+<!-- Please indicate if you wants to be assigned to the issue --> 

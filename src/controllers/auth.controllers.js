@@ -2,6 +2,8 @@ const config = require('../utils/config')
 const asyncWrapper = require('./../utils/async_wrapper')
 const { CustomAPIError, BadRequestError } = require('./../utils/custom_errors')
 const { getAuthCodes, getAuthTokens } = require('./utils/getAuthCredentials')
+const { sendEmail } = require('./utils/email')
+const { BlacklistedTokens } = require('../models/tokenModel')
 
 const User = require('../models/user.models')
 
@@ -53,11 +55,52 @@ const signup = asyncWrapper(async (req, res, next) => {
     })
 })
 
+const verifyEmail = asyncWrapper(async (req, res, next) => {
+    const { verification_code } = req.body;
+    if (!req.body.verification_code) {
+        throw new BadRequestError(
+            'Missing required parameter: Validation failed'
+        );
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer')) {
+        throw new UnauthorizedError('Authentication invalid');
+    }
+
+    const jwtToken = authHeader.split(' ')[1];
+    const payload = decodeJWT(jwtToken);
+
+    const currUser = await User.findOne({ _id: payload._id }).populate(
+        'token status'
+    );
+    if (currUser.status.isVerified) {
+        throw new BadRequestError('User Account already verified');
+    }
+    if (currUser.token.verification_code != verification_code {
+        throw new UnauthorizedError('Invalid verification code');
+    }
+
+    await Status.findOneAndUpdate({ user: payload._id }, { isVerified: true });
+    await Token.findOneAndUpdate({ user: payload._id }, { verification: null });
+    await BlacklistedTokens.findOneAndUpdate(
+        { user: payload._id },
+        { $push: { tokens: jwtToken } },
+        { upsert: true }
+    );
+
+    return res
+        .status(statusCode.OK)
+        .send({ message: 'User Email verified successfully' });
+});
+
+
 const login = asyncWrapper(async (req, res, next) => {
 })
 
 module.exports = {
     signup,
-    login
+    login,
+    verifyEmail
 }
 

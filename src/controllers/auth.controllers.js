@@ -1,6 +1,7 @@
 const config = require('../utils/config')
 const asyncWrapper = require('./../utils/async_wrapper')
 const { CustomAPIError, BadRequestError } = require('./../utils/custom_errors')
+const { getAuthCodes, getAuthTokens } = require('./utils/getAuthCredentials')
 
 const User = require('../models/user.models')
 

@@ -1,13 +1,3 @@
-/*
-    USAGE
-    
-    const loginController = asyncWrapper((req, res, next) => {
-        # Login controller function goes in here
-
-        return res.status(200).send('OK')
-    })
-*/
-
 const asyncWrapper = (fn) => {
     return async (req, res, next) => {
         try {

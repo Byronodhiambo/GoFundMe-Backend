@@ -1,17 +1,16 @@
 const jwt = require('jsonwebtoken');
-const { UnauthorizedError } = require('./custom_errors')
-const config = require('./config')
+const { UnauthorizedError } = require('../../middlewares/customError');
+const config = process.env;
 
 const decodeJWT = (jwtToken) => {
     try {
         let access;
         try {
-            access = jwt.verify(jwtToken, config.JWT_ACCESS_SECRET);
+            access = jwt.verify(jwtToken, config.JWT_SECRET_ACCESS);
             return access
         } catch (error) {
-            // If the error is due to invalid signature, then the token is a refresh token
             if (error.message == 'invalid signature') {
-                return jwt.verify(jwtToken, config.JWT_REFRESH_SECRET);
+                return jwt.verify(jwtToken, config.JWT_SECRET_REFRESH);
             }
             throw error
         }

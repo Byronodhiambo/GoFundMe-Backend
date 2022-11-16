@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { Token } = require('../../models/tokenModel');
-const { decodeJWT } = require('./jwt_handler');
-const config = require('./config');
+const { decodeJWT } = require('./jwt');
+const config = process.env;
 
 // --- HELPERS
 const getAuthTokens = async (user_id) => {
@@ -32,36 +32,4 @@ const getAuthTokens = async (user_id) => {
         throw error;
     }
 };
-
-const getAuthCodes = async (user_id, code_type) => {
-    try {
-        let random_code = `${Math.floor(100000 + Math.random() * 900000)}`;
-        let verification_code, password_reset_code;
-
-        if (code_type == 'verification') {
-            verification_code = random_code
-
-            await Token.update({ verification_code }, {
-                where: {
-                    userId: user_id
-                }
-            })
-        }
-
-        if (code_type == 'password_reset') {
-            password_reset_code = random_code
-
-            await Token.update({ password_reset_code }, {
-                where: {
-                    userId: user_id
-                }
-            })
-        }
-
-        return { verification_code, password_reset_code }
-    } catch (error) {
-        throw error
-    }
-}
-
-module.exports = { getAuthTokens, getAuthCodes };
+module.exports = { getAuthTokens };

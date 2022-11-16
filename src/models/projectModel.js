@@ -45,6 +45,16 @@ const project = new Schema({
         ref: 'User',
         default: []
     }],
+    donations: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Donation',
+        default: []
+    }],
+    status: {
+        type: String,
+        enum: ['Pending', 'Active', 'Completed', 'Cancelled'],
+        default: 'Pending'
+    },
     createdAt: {
         type: Date,
         default: Date.now

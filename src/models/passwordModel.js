@@ -9,7 +9,7 @@ const password = new Schema({
     role: {
         type: String,
         required: true,
-        enum: ["Founder", "SuperAdmin", "Staff", "Ticketer", "BoatOperator", "EndUser"]
+        enum: ['Donor', "EndUser", "SuperAdmin", "ProjectOwner"]
     },
     password: {type: String, required: true}
 },{timestamp: true})

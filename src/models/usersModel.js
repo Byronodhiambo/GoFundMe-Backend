@@ -16,7 +16,7 @@ const userSchema = new Schema({
     email: { type: String, unique: true, required: [true, "email is required"] },
     phonenumber: { type: String },
     address: { type: String },
-    role: { type: String, required: [true, "role is required"], enum: ['EndUser', "SuperAdmin"] }
+    role: { type: String, required: [true, "role is required"], enum: ['EndUser', "Donor", "SuperAdmin", "ProjectOwner"] }
 }, { toObject: { virtuals: true } }, { timestamp: true })
 
 

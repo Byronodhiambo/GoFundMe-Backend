@@ -11,10 +11,7 @@ const token = new Schema(
         role: {
             type: String,
             required: true,
-            enum: [
-                'SuperAdmin',
-                'EndUser'
-            ]
+            enum:['Donor', "EndUser", "SuperAdmin", "ProjectOwner"]
         },
         password_reset: { type: String, default: null },
         verification: {

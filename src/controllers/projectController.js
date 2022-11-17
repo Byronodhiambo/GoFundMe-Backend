@@ -108,11 +108,73 @@ const getProject = asyncWrapper(async (req, res, next) => {
     });
 });
 
+// Request for project review
+const requestReview = asyncWrapper(async (req, res, next) => {
+    const { _id } = req.bearer;
+    const { id } = req.params;
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+        return next(new NotFoundError(`Project with id ${id} not found`));
+    }
+
+    if (project.owner.toString() !== _id.toString()) {
+        return next(new UnauthorizedError(`You are not authorized to ask for review this project`));
+    }
+
+    await project.updateOne({ status: 'Pending' });
+
+    const { email } = await User.findById(project.owner);
+
+    const subject = 'Project review';
+    const text = `Your project with title ${project.title} is pending for review`;
+
+    await sendMail(email, subject, text);
+
+    res.status(200).json({
+        success: true,
+        data: project
+    });
+});
+
+// Review project
+const reviewProject = asyncWrapper(async (req, res, next) => {
+    const { _id } = req.bearer;
+    const { id } = req.params;
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+        return next(new NotFoundError(`Project with id ${id} not found`));
+    }
+
+    if (project.owner.toString() !== _id.toString()) {
+        return next(new UnauthorizedError(`You are not authorized to submit this project for review`));
+    }
+
+    await project.updateOne({ status: 'Active' });
+
+    const { email } = await User.findById(project.owner);
+
+    const subject = 'Project review';
+    const text = `Your project with title ${project.title} is active`;
+
+    await sendMail(email, subject, text);
+
+    res.status(200).json({
+        success: true,
+        data: project
+    });
+});
+
 module.exports = {
     addProject,
     updateProject,
     cancelProject,
-    getProject
+    getProject,
+    requestReview,
+    reviewProject
 };
 
 

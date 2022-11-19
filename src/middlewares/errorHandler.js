@@ -6,7 +6,7 @@ const ValidatorError = mongoose.Error.ValidatorError;
 const errorHandler = (err, req, res, next) => {
     // console.log(err)
 
-    if (process.env.NODE_ENV != "test"){ console.log(err)}
+    if (process.env.NODE_ENV != "test") { console.log(err) }
     if (err instanceof CustomAPIError) {
         return res.status(err.statusCode).send({ message: err.message })
     }
@@ -20,7 +20,7 @@ const errorHandler = (err, req, res, next) => {
         return res.status(400).send({ message: "User already exists" })
     }
 
-    return res.status(500).send({ message: "An error occured" })
+    // return res.status(500).send({ message: "An error occured" })
 }
 
 

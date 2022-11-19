@@ -34,6 +34,11 @@ const getInactiveUserAccounts = asyncWrapper(async (req, res, next) => {
 
 const activateUserAccount = asyncWrapper(async (req, res, next) => {
     const currUser = await User.findOne({ email: req.body.email })
+    if (!currUser) {
+        throw new BadRequestError('User does not exist')
+    }
+    
+    console.log(currUser)
 
     if (currUser.role == "SuperAdmin") { throw new BadRequestError('Unauthorised access') }
     await Status.findOneAndUpdate({ user: currUser._id }, { isActive: true }, { new: true })

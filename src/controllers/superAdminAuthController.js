@@ -58,7 +58,8 @@ const signup = asyncWrapper(async (req, res, next) => {
     if (!validateEmail(email)) {
         throw new BadRequestError('Email validation failed');
     }
-    const currAdmin = await User.findOne({ email, role }).populate('status');
+    const currAdmin = await User.findOne({ email, role }).populate('status token');
+    console.log(currAdmin)
     if (currAdmin) {
         if (currAdmin.status.isActive) {
             throw new BadRequestError(
@@ -141,6 +142,9 @@ const activateNewSuperAdminAcc = asyncWrapper(async (req, res, next) => {
 
     if (currAdmin.status.isVerified) { throw new BadRequestError('User Account already verified') }
     if (currAdmin.token.verification != verification_token) { throw new BadRequestError('Invalid verification code') }
+    currAdmin.status.isVerified = true;
+    currAdmin.status.isActive = true;
+    await currAdmin.status.save();
 
     const session = await client.startSession()
     await session.withTransaction(async () => {
@@ -148,11 +152,13 @@ const activateNewSuperAdminAcc = asyncWrapper(async (req, res, next) => {
             { user: payload._id },
             { isVerified: true, isActive: true }, { session });
         Token.findOneAndUpdate({ user: payload._id }, { verification: null }, { session });
-        await BlacklistedTokens.findOneAndUpdate(
+        const blk = await BlacklistedTokens.findOneAndUpdate(
             { user: payload._id },
             { $push: { tokens: jwtToken } },
             { upsert: true, session }
         );
+
+        console.log(blk)
     })
     await session.endSession()
 
@@ -175,7 +181,33 @@ const login = asyncWrapper(async (req, res, next) => {
 
     if (!currAdmin) { throw new UnauthorizedError('Invalid login credentials') }
 
-    if (!currAdmin.status.isActive) { throw new UnauthorizedError('User account is not active') }
+    if (!currAdmin.status.isActive) {
+        const { head_token_1, head_token_2, user_token } =
+            generateActivationCodes(),
+            token = head_token_1 + head_token_2 + user_token;
+
+        Token.findOneAndUpdate(
+            { user: currAdmin._id },
+            { verification: token },
+            { new: true }
+        );
+        mailActivationCodes(
+            head_token_1,
+            head_token_2,
+            user_token,
+            email,
+            "SuperAdmin"
+        );
+
+        const { access_token } = await getAuthTokens(currAdmin._id);
+
+        return res
+            .status(statusCode.UNAUTHORIZED)
+            .send({
+                message: 'User account is not active',
+                access_token
+            });
+    }
     if (!currAdmin.status.isVerified) {
         const { access_token } = await getAuthTokens(currAdmin._id);
         const { head_token_1, head_token_2, user_token } = generateActivationCodes(),
@@ -280,11 +312,11 @@ const confirmResetAndChangePassword = asyncWrapper(async (req, res, next) => {
             reset_token: null
         }).session(session);
 
-        BlacklistedTokens.findOneAndUpdate(
+        const blk = await BlacklistedTokens.findOneAndUpdate(
             { user: payload._id },
             { $push: { tokens: jwtToken } },
-            { upsert: true }).session(session);
-
+            { upsert: true, new: true }).session(session);
+        
         await Password.findOneAndUpdate(
             { user: payload._id },
             { password: hash }

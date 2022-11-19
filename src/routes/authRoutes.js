@@ -6,7 +6,7 @@ const { basicAuth } = require('../middlewares/auth/auth')
 
 router.
     post('/signup', signup).
-    post('/verify',verifyEmail).
+    post('/verifyemail', verifyEmail).
     post('/login', login).
     post('/googlesignin', googleSignin)
 

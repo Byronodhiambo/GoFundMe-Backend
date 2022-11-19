@@ -56,7 +56,8 @@ const signup = asyncWrapper(async (req, res, next) => {
         throw new BadRequestError('Email validation failed');
     }
 
-    const currUser = await User.findOne({ email: email }).populate('status');
+    const currUser = await User.findOne({ email: email }).populate('status token');
+    console.log(currUser)
     if (currUser) {
         if (!currUser.status.isVerified) {
             let new_token = Math.floor(100000 + Math.random() * 900000);
@@ -88,7 +89,7 @@ const signup = asyncWrapper(async (req, res, next) => {
     const newUser = await User.create(req.body);
     const ver_token = await newUser.completeSave(data);
 
-    // console.log(newUser);
+    console.log(newUser);
 
     await sendMail(
         new EmailMsg(email, firstname, ver_token).userAccountVerification()
@@ -120,6 +121,7 @@ const verifyEmail = asyncWrapper(async (req, res, next) => {
     }
 
     const currUser = await User.findOne({ _id: payload._id }).populate('token status');
+    console.log(currUser)
     if (currUser.status.isVerified) { throw new BadRequestError('User Account already verified') }
     if (currUser.token.verification != verification_token) { throw new BadRequestError('Invalid verification code') }
 

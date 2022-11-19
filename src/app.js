@@ -27,10 +27,10 @@ app.use('/api/v1/auth/superadmin', superAdminAuthRoute)
 // Post-login
 app.use('/api/v1/auth/user', basicAuth, userRoute)
 // app.use('/api/v1/admin', basicAuth, adminRoute)
-app.use('/', (req, res, next) => {
-    return next(new NotFoundError("Route not found")) // 404
-})
 app.use(errorHandler)
+app.use('/', (req, res, next) => {
+    res.status(404).send({ message: "Not found" })
+})
 
 
 module.exports = app;

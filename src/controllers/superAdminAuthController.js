@@ -152,11 +152,13 @@ const activateNewSuperAdminAcc = asyncWrapper(async (req, res, next) => {
             { user: payload._id },
             { isVerified: true, isActive: true }, { session });
         Token.findOneAndUpdate({ user: payload._id }, { verification: null }, { session });
-        await BlacklistedTokens.findOneAndUpdate(
+        const blk = await BlacklistedTokens.findOneAndUpdate(
             { user: payload._id },
             { $push: { tokens: jwtToken } },
             { upsert: true, session }
         );
+
+        console.log(blk)
     })
     await session.endSession()
 
@@ -310,11 +312,11 @@ const confirmResetAndChangePassword = asyncWrapper(async (req, res, next) => {
             reset_token: null
         }).session(session);
 
-        BlacklistedTokens.findOneAndUpdate(
+        const blk = await BlacklistedTokens.findOneAndUpdate(
             { user: payload._id },
             { $push: { tokens: jwtToken } },
-            { upsert: true }).session(session);
-
+            { upsert: true, new: true }).session(session);
+        
         await Password.findOneAndUpdate(
             { user: payload._id },
             { password: hash }

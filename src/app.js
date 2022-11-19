@@ -22,12 +22,12 @@ const authRoute = require('./routes/authRoutes'),
     superAdminAuthRoute = require('./routes/superAdminAuthRoutes')
 
 // Auth 
-app.use('/api/auth', authRoute)
-app.use('/api/auth/superadmin', superAdminAuthRoute)
+app.use('/api/v1/auth', authRoute)
+app.use('/api/v1/auth/superadmin', superAdminAuthRoute)
 
 // Post-login
-app.use('/api/auth/user', basicAuth, userRoute)
-// app.use('/api/admin', basicAuth, adminRoute)
+app.use('/api/v1/auth/user', basicAuth, userRoute)
+// app.use('/api/v1/admin', basicAuth, adminRoute)
 
 
 

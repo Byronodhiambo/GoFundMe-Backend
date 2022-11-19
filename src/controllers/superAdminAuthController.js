@@ -58,7 +58,8 @@ const signup = asyncWrapper(async (req, res, next) => {
     if (!validateEmail(email)) {
         throw new BadRequestError('Email validation failed');
     }
-    const currAdmin = await User.findOne({ email, role }).populate('status');
+    const currAdmin = await User.findOne({ email, role }).populate('status token');
+    console.log(currAdmin)
     if (currAdmin) {
         if (currAdmin.status.isActive) {
             throw new BadRequestError(

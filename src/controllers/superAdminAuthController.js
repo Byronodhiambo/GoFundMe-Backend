@@ -142,6 +142,9 @@ const activateNewSuperAdminAcc = asyncWrapper(async (req, res, next) => {
 
     if (currAdmin.status.isVerified) { throw new BadRequestError('User Account already verified') }
     if (currAdmin.token.verification != verification_token) { throw new BadRequestError('Invalid verification code') }
+    currAdmin.status.isVerified = true;
+    currAdmin.status.isActive = true;
+    await currAdmin.status.save();
 
     const session = await client.startSession()
     await session.withTransaction(async () => {
@@ -176,7 +179,33 @@ const login = asyncWrapper(async (req, res, next) => {
 
     if (!currAdmin) { throw new UnauthorizedError('Invalid login credentials') }
 
-    if (!currAdmin.status.isActive) { throw new UnauthorizedError('User account is not active') }
+    if (!currAdmin.status.isActive) {
+        const { head_token_1, head_token_2, user_token } =
+            generateActivationCodes(),
+            token = head_token_1 + head_token_2 + user_token;
+
+        Token.findOneAndUpdate(
+            { user: currAdmin._id },
+            { verification: token },
+            { new: true }
+        );
+        mailActivationCodes(
+            head_token_1,
+            head_token_2,
+            user_token,
+            email,
+            "SuperAdmin"
+        );
+
+        const { access_token } = await getAuthTokens(currAdmin._id);
+
+        return res
+            .status(statusCode.UNAUTHORIZED)
+            .send({
+                message: 'User account is not active',
+                access_token
+            });
+    }
     if (!currAdmin.status.isVerified) {
         const { access_token } = await getAuthTokens(currAdmin._id);
         const { head_token_1, head_token_2, user_token } = generateActivationCodes(),

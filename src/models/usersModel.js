@@ -28,8 +28,7 @@ userSchema.methods.completeSave = async function (data) {
         const client = mongoose.connection
 
         data.user = this._id
-        if (data.role == "EndUser") { data.isActive = true }
-
+        if (data.role == "EndUser" || data.role == "Donor") { data.isActive = true }
 
         const session = await client.startSession()
         session.startTransaction()

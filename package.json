@@ -6,6 +6,7 @@
     "scripts": {
         "test": "cross-env NODE_ENV=test mocha ./src/test/ --timeout 40000",
         "dev": "cross-env NODE_ENV=dev nodemon ./src/server.js",
+        "create-env": "printenv > .env",
         "start": "nodemon ./src/server"
     },
     "author": "",
@@ -25,7 +26,7 @@
         "crypto": "^1.0.1",
         "date-fns": "^2.29.3",
         "dateformat": "^5.0.3",
-        "dotenv": "^16.0.1",
+        "dotenv": "^16.0.3",
         "express": "^4.18.1",
         "express-async-errors": "^3.1.1",
         "google-auth-library": "^8.5.1",
